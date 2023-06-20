@@ -1,3 +1,5 @@
+const { IOS_CONFIG } = require('@wdio/cli/build/constants');
+
 describe('Android Native Feature Tests', () => {
   it('Access an Activity directly', async () => {
     // Access an activity
@@ -41,7 +43,7 @@ describe('Android Native Feature Tests', () => {
     await expect($('//*[@resource-id="android:id/alertTitle"]')).not.toExist();
   });
 
-  it.only('Vertical scrolling', async () => {
+  it('Vertical scrolling', async () => {
     await $('~App').click();
     await $('~Activity').click();
 
@@ -59,5 +61,52 @@ describe('Android Native Feature Tests', () => {
 
     //assertion
     await expect($('~Secure Dialog')).toExist();
+  });
+
+  it.only('Horizontal scrolling', async () => {
+    await driver.startActivity(
+      'io.appium.android.apis',
+      'io.appium.android.apis.view.Gallery1'
+    );
+
+    //horizontal scroll
+    await $(
+      'android=new UiScrollable(new UiSelector().scrollable(true)).setAsHorizontalList().scrollForward()'
+    );
+    await $(
+      'android=new UiScrollable(new UiSelector().scrollable(true)).setAsHorizontalList().scrollBackward()'
+    );
+    await driver.pause(3000);
+  });
+
+  it('Scrolling Exercise', async () => {
+    //access the date picker
+    await driver.startActivity(
+      'io.appium.android.apis',
+      'io.appium.android.apis.view.DateWidgets1'
+    );
+
+    //get current date
+    const date = await $(
+      '//*[@resource-id="io.appium.android.apis:id/dateDisplay"]'
+    );
+    const currentDate = await date.getText();
+
+    //click on change button
+    await $('~change the date').click();
+
+    //scroll right to the next month
+    await $(
+      'android=new UiScrollable(new UiSelector().scrollable(true)).setAsHorizontalList().scrollForward()'
+    );
+
+    //select the 10th date
+    await $('//*[text="10"]').click();
+
+    // click on ok button
+    await $('//*[@resource-id="android:id/button1"]').click();
+
+    //verify the updated date
+    await expect(await date.getText()).not.toEqual(currentDate);
   });
 });
